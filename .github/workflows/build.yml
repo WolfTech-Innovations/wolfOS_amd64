@@ -1,0 +1,61 @@
+name: wolfOS Build and Sync
+
+on:
+  push:
+    branches:
+      - main  # Run the workflow on push to the main branch
+  pull_request:
+    branches:
+      - main  # Run the workflow on PRs to the main branch
+
+jobs:
+  chromiumos-build:
+    runs-on: ubuntu-latest
+    steps:
+      
+      # Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      # Set up Python environment (required for repo commands)
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      # Install required dependencies
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip git wget curl
+          python3 -m pip install --upgrade pip
+          python3 -m pip install repo
+
+      # Initialize repo with the manifest
+      - name: Initialize repo
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          repo init -u https://chromium.googlesource.com/chromiumos/manifest.git -b main
+          
+      # Sync repo to get the source code
+      - name: Sync repo
+        run: |
+          repo sync -j8
+
+      # Build Chromium OS (build chromimos)
+      - name: Build Chromium OS (chromimos)
+        run: |
+          source /opt/chromeos-chroot-tools/setup_chroot.sh
+          ./chromite/bin/cbuildozer build chromimos
+
+      # Build chromite (for tooling)
+      - name: Build chromite
+        run: |
+          source /opt/chromeos-chroot-tools/setup_chroot.sh
+          ./chromite/bin/cbuildozer build chromite
+
+      # Clean up
+      - name: Clean up
+        run: |
+          sudo rm -rf $HOME/.repo/
