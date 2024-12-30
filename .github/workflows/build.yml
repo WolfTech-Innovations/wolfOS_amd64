@@ -37,8 +37,7 @@ jobs:
           git config --global http.postBuffer 1048576000
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          cd ChromiumOS/chromite/bin
-          ./cros build-packages
+          sudo bash build.sh
           source /opt/chromeos-chroot-tools/setup_chroot.sh
           ./chromite/bin/cbuildozer build chromimos
           source /opt/chromeos-chroot-tools/setup_chroot.sh
