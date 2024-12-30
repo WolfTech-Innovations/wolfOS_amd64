@@ -12,7 +12,7 @@ HOMEPAGE="https://fydeos.com"
 
 SLOT="0"
 KEYWORDS="amd64 x86"
-IUSE="fydeos"
+IUSE="wolfOS"
 LICENSE="GPL-3"
 
 RDEPEND="

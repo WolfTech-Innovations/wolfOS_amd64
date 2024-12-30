@@ -1,14 +1,14 @@
 #!/bin/busybox sh
 set -x
 
-FYDEOS_ROOT="/fydeos"
+FYDEOS_ROOT="/"
 BOOT="/boot"
 FYDEOS_KERNEL="${BOOT}/vmlinuz"
-FYDEOS_KERNEL_A="fydeos_vmlinuzA"
-FYDEOS_KERNEL_B="fydeos_vmlinuzB"
+FYDEOS_KERNEL_A=""
+FYDEOS_KERNEL_B=""
 FYDEOS_IMG="${FYDEOS_ROOT}/fydeos_dual_boot.img"
 ROOT_MNT="${FYDEOS_ROOT}/root"
-DUAL_BOOT_LABEL="FYDEOS-DUAL-BOOT"
+DUAL_BOOT_LABEL="wolfOS"
 
 create_dir() {
   if [ ! -d $1 ]; then

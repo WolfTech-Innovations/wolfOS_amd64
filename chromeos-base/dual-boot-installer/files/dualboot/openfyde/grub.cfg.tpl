@@ -17,17 +17,17 @@ set root=loopdev,gpt12
 
 # NOTE: find rootfs by label (not partion label)
 
-menuentry "openFyde multi-boot A" {
+menuentry "wolfOS multi-boot A" {
   linux /syslinux/vmlinuz.A init=/sbin/init boot=local rootwait noresume noswap ro loglevel=7 console= i915.modeset=1 cros_efi fydeos_dualboot %EXTRA_FLAG%
   initrd ($dualboot_part)/boot/dual_boot_ramfs.cpio
 }
 
-menuentry "openFyde multi-boot B" {
+menuentry "wolfOS multi-boot B" {
   linux /syslinux/vmlinuz.B init=/sbin/init boot=local rootwait noresume noswap ro loglevel=7 console= i915.modeset=1 cros_efi fydeos_dualboot %EXTRA_FLAG%
   initrd ($dualboot_part)/boot/dual_boot_ramfs.cpio
 }
 
-menuentry "FydeOS Recovery Tools" {
+menuentry "wolfOS Recovery Tools" {
   set root=$dualboot_part
   linux /boot/openfyde_vmlinuzB init=/sbin/init root=%ROOTDEV% boot=local rootwait noresume noswap ro loglevel=7 console= i915.modeset=1 cros_efi %EXTRA_FLAG%
   initrd /boot/core_util_ramfs.cpio

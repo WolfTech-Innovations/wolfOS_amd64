@@ -2,14 +2,14 @@
 set -x
 
 FYDEOS_ROOT="/openfyde"
-BOOT="/boot"
+BOOT="boot"
 FYDEOS_KERNEL="${BOOT}/vmlinuz"
-FYDEOS_KERNEL_A="openfyde_vmlinuzA"
-FYDEOS_KERNEL_B="openfyde_vmlinuzB"
-FYDEOS_IMG="${FYDEOS_ROOT}/openfyde_dual_boot.img"
+FYDEOS_KERNEL_A="vmlinuz"
+FYDEOS_KERNEL_B="vmlinuz"
+FYDEOS_IMG="${FYDEOS_ROOT}/wolfOS.iso"
 ROOT_MNT="${FYDEOS_ROOT}/root"
 # The maximum length of fs label is 16
-DUAL_BOOT_LABEL="OFYDE-DUAL-BOOT"
+DUAL_BOOT_LABEL="wolfOS"
 
 create_dir() {
   if [ ! -d $1 ]; then

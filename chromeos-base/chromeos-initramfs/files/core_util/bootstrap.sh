@@ -51,7 +51,7 @@ enable_debug_console() {
     info "Please set a valid [console=XXX] in kernel command line."
   else
     info -e '\033[1;33m[cros_debug] enabled on '${tty}'.\033[m'
-    invoke_terminal "${tty}" "[Bootstrap FydeOS Core Utilities Console]" "/bin/bash"
+    invoke_terminal "${tty}" "[Bootstrap wolfOS Core Utilities Console]" "/bin/bash"
   fi
 }
 

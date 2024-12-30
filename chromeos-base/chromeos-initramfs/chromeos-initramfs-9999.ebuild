@@ -19,7 +19,7 @@ IUSE="${IUSE} legacy_firmware_ui -mtd +power_management"
 IUSE="${IUSE} unibuild +oobe_config no_factory_flow"
 IUSE="${IUSE} nvme ufs"
 IUSE="${IUSE} cr50_onboard ti50_onboard tpm"
-IUSE="${IUSE} fydeos"
+IUSE="${IUSE} wolfOS"
 
 # Build Targets
 TARGETS_IUSE="
