@@ -36,7 +36,7 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          repo init -u https://chromium.googlesource.com/chromiumos/manifest.git -b main
+          repo init -u https://chromium.googlesource.com/chromiumos/manifest.git -b stable
           
       # Sync repo to get the source code
       - name: Sync repo
