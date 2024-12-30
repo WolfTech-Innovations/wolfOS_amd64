@@ -1,0 +1,11 @@
+include chromiumos/owners:v1:/infra/OWNERS.build
+include /OWNERS.bazel
+
+# Add individuals outside Build who want OWNERS privileges.
+# Keep sorted.  The LAST_RESORT_SUGGESTION should be applied to each
+# user so that people see our GWSQ instead.
+engeg@google.com #{LAST_RESORT_SUGGESTION}
+
+per-file OWNERS.au = file://OWNERS.au
+per-file OWNERS.fw = file://OWNERS.fw
+per-file OWNERS.kernel = file://OWNERS.kernel
