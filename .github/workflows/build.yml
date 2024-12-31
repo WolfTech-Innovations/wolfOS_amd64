@@ -34,17 +34,31 @@ jobs:
       # Initialize repo with the manifest
       - name: Build wolfOS base system
         run: |
-          git config --global http.postBuffer 1048576000
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-<<<<<<< HEAD
-          sudo bash build.sh
-=======
-          cd ChromiumOS/chromite/bin
-          ./cros build-packages
->>>>>>> 55e7e51 (Commit files)
-          source /opt/chromeos-chroot-tools/setup_chroot.sh
-          ./chromite/bin/cbuildozer build chromimos
-          source /opt/chromeos-chroot-tools/setup_chroot.sh
-          ./chromite/bin/cbuildozer build chromite
-          sudo rm -rf $HOME/.repo/
+         run_command() {
+  step="$1"
+  command="$2"
+  echo -e "\033[1;34m[INFO]\033[0m $step..."
+  eval $command
+  if [ $? -eq 0 ]; then
+    echo -e "\033[1;32m[SUCCESS]\033[0m $step completed."
+  else
+    echo -e "\033[1;31m[ERROR]\033[0m $step failed. Exiting."
+    exit 1
+  fi
+}
+
+echo -e "\033[1;32mStarting ChromiumOS Build Process\033[0m"
+
+run_command "Configuring Git postBuffer" "git config --global http.postBuffer 1048576000"
+run_command "Setting Git username" "git config --global user.name 'github-actions'"
+run_command "Setting Git email" "git config --global user.email 'github-actions@github.com'"
+run_command "Running build script" "sudo bash build.sh"
+run_command "Navigating to Chromite bin directory" "cd ChromiumOS/chromite/bin"
+run_command "Building packages" "./cros build-packages"
+run_command "Setting up chroot environment" "source /opt/chromeos-chroot-tools/setup_chroot.sh"
+run_command "Building chromimos" "./chromite/bin/cbuildozer build chromimos"
+run_command "Setting up chroot environment again" "source /opt/chromeos-chroot-tools/setup_chroot.sh"
+run_command "Building chromite" "./chromite/bin/cbuildozer build chromite"
+run_command "Cleaning up repo cache" "sudo rm -rf $HOME/.repo/"
+
+echo -e "\033[1;32mBuild process completed!\033[0m"
