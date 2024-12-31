@@ -15,12 +15,6 @@ SCRIPT_ROOT="$(dirname "$(readlink -f "$0")")"
 . "${SCRIPT_ROOT}/common.sh" || exit 1
 # shellcheck source=build_library/build_common.sh
 . "${BUILD_LIBRARY_DIR}/build_common.sh" || exit 1
-
-if [[ "$1" != "--script-is-run-only-by-chromite-and-not-users" ]]; then
-  die_notrace 'This script must not be run by users.' \
-    'Please run `cros build-image` instead.'
-fi
-
 # Discard the 'script-is-run-only-by-chromite-and-not-users' flag.
 shift
 

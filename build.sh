@@ -15,23 +15,23 @@ VERSION="1.0"         # Define your custom version
 # Functions
 function setup_chroot() {
     echo "Setting up chroot environment..."
-    sudo ../chromite/bin/cros_sdk --create --replace
+    sudo ./ChromiumOS/chromite/bin/cros_sdk --create --replace
 }
 
 function enter_chroot() {
     echo "Entering chroot and syncing..."
-    sudo ./chromite/bin/cros_sdk -- ./setup_board --board="${BOARD}"
-    sudo ./chromite/bin/cros_sdk -- ./update_chroot
+    sudo ./ChromiumOS/chromite/bin/cros_sdk -- ./setup_board --board="${BOARD}"
+    sudo ./ChromiumOS/chromite/cros_sdk -- ./update_chroot
 }
 
 function build_packages() {
     echo "Building packages for ${BOARD}..."
-    sudo ./chromite/bin/cros_sdk -- ./build_packages --board="${BOARD}"
+    sudo ./ChromiumOS/chromite/bin/cros_sdk -- ./build_packages --board="${BOARD}"
 }
 
 function build_image() {
     echo "Building image for ${BOARD}..."
-    sudo ./chromite/bin/cros_sdk -- ./build_image --board="${BOARD}" --noenable_rootfs_verification
+    sudo ./ChromiumOS/chromite/bin/cros_sdk -- ./build_image --board="${BOARD}" --noenable_rootfs_verification
 }
 
 function move_output() {
@@ -43,7 +43,7 @@ function move_output() {
 
 function clean_up() {
     echo "Cleaning up..."
-    sudo ./chromite/bin/cros_sdk -- ./clean_chroot
+    sudo ./ChromiumOS/chromite/bin/cros_sdk -- ./clean_chroot
 }
 
 # Main script
