@@ -22,6 +22,17 @@ jobs:
     - name: Set Git email
       run: git config --global user.email 'github-actions@github.com'
 
+    - name: Install repo tool
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y curl
+        mkdir -p ~/bin
+        curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+        chmod a+x ~/bin/repo
+        echo 'export PATH=~/bin:$PATH' >> ~/.bashrc
+        source ~/.bashrc
+
+
     - name: Intialize Repo
       run: repo init -u https://chromium.googlesource.com/chromiumos/manifest -b stable && repo sync
 
