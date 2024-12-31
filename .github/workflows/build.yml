@@ -1,3 +1,5 @@
+name: Build wolfOS Image for ARM64
+
 on:
   push:
     branches:
@@ -20,6 +22,10 @@ jobs:
     - name: Set Git email
       run: git config --global user.email 'github-actions@github.com'
 
+    - name: Intialize Repo
+      run: repo init -u https://chromium.googlesource.com/chromiumos/manifest -b stable && repo sync
+
+     
     - name: Run build script
       run: sudo bash build.sh
 
