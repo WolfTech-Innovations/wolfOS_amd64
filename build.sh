@@ -15,7 +15,7 @@ VERSION="1.0"         # Define your custom version
 # Functions
 function setup_chroot() {
     echo "Setting up chroot environment..."
-    sudo ./ChromiumOS/chromite/bin/cros_sdk --create --replace
+    sudo ./ChromiumOS/chromite/bin/bash
 }
 
 function enter_chroot() {
