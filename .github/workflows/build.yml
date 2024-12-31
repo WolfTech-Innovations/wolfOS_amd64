@@ -27,16 +27,14 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y curl
         mkdir -p ~/bin
-        curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+        curl https://storage.googleapis.com/git-repo-downloads/repo > ./scripts/repo
         chmod a+x ~/bin/repo
         echo 'export PATH=~/bin:$PATH' >> ~/.bashrc
         source ~/.bashrc
 
-
     - name: Intialize Repo
-      run: repo init -u https://chromium.googlesource.com/chromiumos/manifest -b stable && repo sync
-
-     
+      run: ./scripts/repo init -u https://chromium.googlesource.com/chromiumos/manifest -b stable && repo sync
+  
     - name: Run build script
       run: sudo bash build.sh
 
