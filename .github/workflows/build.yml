@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  install_dependencies:
+  build_wolfos_image:
     runs-on: ubuntu-latest
     steps:
       - name: Install essential dependencies and prepare environment
@@ -16,53 +16,30 @@ jobs:
           sudo apt-get install build-essential git curl python3 python3-pip python3-dev lib32stdc++6 lib32z1 libglib2.0-0 libgstreamer1.0 libncurses5-dev libnss3-dev clang binutils gcc-multilib pkg-config
           echo "Dependencies installed successfully."
 
-  initialize_repo_directory:
-    runs-on: ubuntu-latest
-    needs: install_dependencies
-    steps:
       - name: Initialize working directory and clone the repository
         run: |
           echo "Starting repository initialization..."
           git clone https://github.com/WolfTech-Innovations/wolfOS_amd64
           echo "Repository cloned successfully."
 
-  configure_git_postbuffer:
-    runs-on: ubuntu-latest
-    needs: initialize_repo_directory
-    steps:
       - name: Configure global git settings for smooth operation
         run: |
           echo "Configuring Git settings..."
           git config --global http.postBuffer 1048576000
           echo "Git settings configured successfully."
-        working-directory: /home/runner/ABS
 
-  set_git_username:
-    runs-on: ubuntu-latest
-    needs: configure_git_postbuffer
-    steps:
       - name: Set Git username for the current repository
         run: |
           echo "Setting Git username..."
           git config --global user.name 'github-actions'
           echo "Git username set successfully."
-        working-directory: /home/runner/ABS
 
-  set_git_email:
-    runs-on: ubuntu-latest
-    needs: set_git_username
-    steps:
       - name: Set Git email for the current repository
         run: |
           echo "Setting Git email..."
           git config --global user.email 'github-actions@github.com'
           echo "Git email set successfully."
-        working-directory: /home/runner/ABS
 
-  install_repo_tool:
-    runs-on: ubuntu-latest
-    needs: set_git_email
-    steps:
       - name: Install the repo tool to manage the repositories efficiently
         run: |
           echo "Installing repo tool..."
@@ -71,10 +48,6 @@ jobs:
           chmod a+x ./scripts/repo
           echo "Repo tool installed successfully."
 
-  initialize_repo:
-    runs-on: ubuntu-latest
-    needs: install_repo_tool
-    steps:
       - name: Initialize repo tool with ChromiumOS manifest
         run: |
           echo "Initializing repo tool with the ChromiumOS manifest..."
@@ -87,158 +60,93 @@ jobs:
           ./scripts/repo sync --jobs=4 --verbose
           echo "Repo synced successfully."
 
-  run_build_script:
-    runs-on: ubuntu-latest
-    needs: initialize_repo
-    steps:
       - name: Execute the build script to start the build process
         run: |
           echo "Starting build script..."
           bash build.sh -v
           echo "Build script executed successfully."
-        working-directory: /home/runner/ABS
 
-  navigate_to_chromite_bin:
-    runs-on: ubuntu-latest
-    needs: run_build_script
-    steps:
       - name: Navigate to the Chromite binary directory to prepare for building
         run: |
           echo "Navigating to the Chromite binary directory..."
-        working-directory: /home/runner/ABS/ChromiumOS/chromite/bin
+        working-directory: /ChromiumOS/chromite/bin
 
-  build_packages:
-    runs-on: ubuntu-latest
-    needs: navigate_to_chromite_bin
-    steps:
       - name: Start building necessary packages for the project
         run: |
           echo "Building packages..."
           ./cros build-packages --verbose
           echo "Packages built successfully."
 
-  setup_chroot:
-    runs-on: ubuntu-latest
-    needs: build_packages
-    steps:
       - name: Set up the chroot environment for the build process
         run: |
           echo "Setting up the chroot environment..."
           source /opt/chromeos-chroot-tools/setup_chroot.sh
           echo "Chroot environment set up successfully."
 
-  build_chromimos:
-    runs-on: ubuntu-latest
-    needs: setup_chroot
-    steps:
       - name: Initiate the build of chromimos
         run: |
           echo "Building chromimos..."
           ./chromite/bin/cbuildozer build chromimos --verbose
           echo "Chromimos built successfully."
 
-  rerun_chroot_setup:
-    runs-on: ubuntu-latest
-    needs: build_chromimos
-    steps:
       - name: Re-run the chroot setup for a fresh environment
         run: |
           echo "Re-running the chroot setup..."
           source /opt/chromeos-chroot-tools/setup_chroot.sh
           echo "Chroot setup re-run successfully."
 
-  build_chromite:
-    runs-on: ubuntu-latest
-    needs: rerun_chroot_setup
-    steps:
       - name: Proceed with building the chromite tools
         run: |
           echo "Building chromite..."
           ./chromite/bin/cbuildozer build chromite --verbose
           echo "Chromite built successfully."
 
-  clean_repo_cache:
-    runs-on: ubuntu-latest
-    needs: build_chromite
-    steps:
       - name: Clean the repository cache to free up space
         run: |
           echo "Cleaning repository cache..."
           rm -rf runner/.repo/
           echo "Repository cache cleaned successfully."
 
-  verify_repo_cache:
-    runs-on: ubuntu-latest
-    needs: clean_repo_cache
-    steps:
       - name: Double-check repo cache for consistency
         run: |
           echo "Double-checking repo cache consistency..."
           ./scripts/repo status --verbose
           echo "Repo cache consistency verified successfully."
 
-  secondary_chroot_setup:
-    runs-on: ubuntu-latest
-    needs: verify_repo_cache
-    steps:
       - name: Perform a secondary setup of the environment for extra precaution
         run: |
           echo "Performing secondary chroot setup..."
           source /opt/chromeos-chroot-tools/setup_chroot.sh
           echo "Secondary chroot setup completed successfully."
 
-  verify_build_output:
-    runs-on: ubuntu-latest
-    needs: secondary_chroot_setup
-    steps:
       - name: Verify the build output before proceeding
         run: |
           echo "Verifying build output..."
           ls -alh build_output/
           echo "Build output verified successfully."
 
-  cleanup_environment:
-    runs-on: ubuntu-latest
-    needs: verify_build_output
-    steps:
       - name: Run a cleanup process to ensure the environment is spotless
         run: |
           echo "Cleaning up the environment..."
           sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/*
           echo "Environment cleanup completed successfully."
 
-  final_verification:
-    runs-on: ubuntu-latest
-    needs: cleanup_environment
-    steps:
       - name: Complete the final verification of build process
         run: |
           echo "Final verification of build process..."
           # Add any necessary verification steps here
           echo "Final build verification completed successfully."
 
-  notify_completion:
-    runs-on: ubuntu-latest
-    needs: final_verification
-    steps:
       - name: Notify completion of build process with verbose message
         run: |
           echo "Build process completed successfully! All steps executed with care."
-          
-  extra_cleanup:
-    runs-on: ubuntu-latest
-    needs: notify_completion
-    steps:
+
       - name: Trigger an extra cleanup process just for good measure
         run: |
           echo "Performing extra cleanup..."
           sudo rm -rf /tmp/*
           echo "Extra cleanup completed successfully."
 
-  announce_completion:
-    runs-on: ubuntu-latest
-    needs: extra_cleanup
-    steps:
       - name: Announce the completion of the build process loudly
         run: |
           echo "Build process completed! All tasks have been successfully finished."
