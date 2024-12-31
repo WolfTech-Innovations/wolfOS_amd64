@@ -1,5 +1,4 @@
-[![Build wolfOS Image for ARM64](https://github.com/WolfTech-Innovations/wolfOS_amd64/actions/workflows/build.yml/badge.svg)](https://github.com/WolfTech-Innovations/wolfOS_amd64/actions/workflows/build.yml) Here's the updated README for your **wolfOS** without the documentation, license, or contributing sections, and with the correct username **WolfTech-Innovations**:
-
+[![Build wolfOS Image for ARM64](https://github.com/WolfTech-Innovations/wolfOS_amd64/actions/workflows/build.yml/badge.svg)](https://github.com/WolfTech-Innovations/wolfOS_amd64/actions/workflows/build.yml) 
 ---
 
 # wolfOS
