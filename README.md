@@ -19,7 +19,7 @@ To install wolfOS, follow these steps:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/WolfTech-Innovations/wolfOS.git
+   git clone https://github.com/WolfTech-Innovations/wolfOS_amd64.git
    cd wolfOS
    ```
 
