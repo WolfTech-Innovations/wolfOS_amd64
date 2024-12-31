@@ -8,8 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: ubuntu:21.04
     steps:
     - name: Install dependencies
       run: apt-get update &&  apt-get install build-essential git curl python3 python3-pip python3-dev lib32stdc++6 lib32z1 libglib2.0-0 libgstreamer1.0 libncurses5-dev libnss3-dev clang binutils gcc-multilib pkg-config
