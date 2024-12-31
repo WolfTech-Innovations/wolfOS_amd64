@@ -1,64 +1,48 @@
-name: wolfOS Build and Sync
-
 on:
   push:
     branches:
-      - main  # Run the workflow on push to the main branch
-  pull_request:
-    branches:
-      - main  # Run the workflow on PRs to the main branch
+      - main
 
 jobs:
-  chromiumos-build:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      
-      # Checkout the repository
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      # Set up Python environment (required for repo commands)
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
+    - name: Configure Git postBuffer
+      run: git config --global http.postBuffer 1048576000
 
-      # Install required dependencies
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y python3-pip git wget curl
-          python3 -m pip install --upgrade pip
-          python3 -m pip install repo
+    - name: Set Git username
+      run: git config --global user.name 'github-actions'
 
-      # Initialize repo with the manifest
-      - name: Build wolfOS base system
-        run: |
-         run_command() {
-  step="$1"
-  command="$2"
-  echo -e "\033[1;34m[INFO]\033[0m $step..."
-  eval $command
-  if [ $? -eq 0 ]; then
-    echo -e "\033[1;32m[SUCCESS]\033[0m $step completed."
-  else
-    echo -e "\033[1;31m[ERROR]\033[0m $step failed. Exiting."
-    exit 1
-  fi
-}
+    - name: Set Git email
+      run: git config --global user.email 'github-actions@github.com'
 
-echo -e "\033[1;32mStarting ChromiumOS Build Process\033[0m"
+    - name: Run build script
+      run: sudo bash build.sh
 
-run_command "Configuring Git postBuffer" "git config --global http.postBuffer 1048576000"
-run_command "Setting Git username" "git config --global user.name 'github-actions'"
-run_command "Setting Git email" "git config --global user.email 'github-actions@github.com'"
-run_command "Running build script" "sudo bash build.sh"
-run_command "Navigating to Chromite bin directory" "cd ChromiumOS/chromite/bin"
-run_command "Building packages" "./cros build-packages"
-run_command "Setting up chroot environment" "source /opt/chromeos-chroot-tools/setup_chroot.sh"
-run_command "Building chromimos" "./chromite/bin/cbuildozer build chromimos"
-run_command "Setting up chroot environment again" "source /opt/chromeos-chroot-tools/setup_chroot.sh"
-run_command "Building chromite" "./chromite/bin/cbuildozer build chromite"
-run_command "Cleaning up repo cache" "sudo rm -rf $HOME/.repo/"
+    - name: Navigate to Chromite bin directory
+      run: cd ChromiumOS/chromite/bin
 
-echo -e "\033[1;32mBuild process completed!\033[0m"
+    - name: Build packages
+      run: ./cros build-packages
+
+    - name: Setup chroot environment
+      run: source /opt/chromeos-chroot-tools/setup_chroot.sh
+
+    - name: Build chromimos
+      run: ./chromite/bin/cbuildozer build chromimos
+
+    - name: Setup chroot environment again
+      run: source /opt/chromeos-chroot-tools/setup_chroot.sh
+
+    - name: Build chromite
+      run: ./chromite/bin/cbuildozer build chromite
+
+    - name: Clean up repo cache
+      run: sudo rm -rf $HOME/.repo/
+
+    - name: Build process completed
+      run: echo "Build process completed!"
