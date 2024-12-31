@@ -41,11 +41,6 @@ function move_output() {
     echo "Build artifacts stored in ${OUTPUT_DIR}"
 }
 
-function clean_up() {
-    echo "Cleaning up..."
-    sudo ./ChromiumOS/chromite/bin/cros_sdk -- ./clean_chroot
-}
-
 # Main script
 echo "Starting ChromeOS build process..."
 
@@ -64,7 +59,5 @@ build_image
 # Step 5: Move output to a safe directory
 move_output
 
-# Step 6: Cleanup
-clean_up
 
 echo "Build process completed!"
