@@ -28,9 +28,7 @@ jobs:
         sudo apt-get install -y curl
         sudo mkdir -p ./scripts
         curl https://storage.googleapis.com/git-repo-downloads/repo > ./scripts/repo
-        chmod a+x ~/bin/repo
-        echo 'export PATH=~/bin:$PATH' >> ~/.bashrc
-        source ~/.bashrc
+        chmod a+x ./scripts/repo
 
     - name: Intialize Repo
       run: ./scripts/repo init -u https://chromium.googlesource.com/chromiumos/manifest -b stable && ./scripts/repo sync
