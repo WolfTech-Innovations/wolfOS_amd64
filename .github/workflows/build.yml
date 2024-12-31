@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Install essential dependencies and prepare environment
         run: |
-          cd $HOME && mkdir -p ABS && cd ABS
+          cd runner && mkdir -p ABS && cd ABS
           sudo apt-get update
           sudo apt-get install build-essential git curl python3 python3-pip python3-dev lib32stdc++6 lib32z1 libglib2.0-0 libgstreamer1.0 libncurses5-dev libnss3-dev clang binutils gcc-multilib pkg-config
           echo "Dependencies installed successfully."
@@ -35,7 +35,7 @@ jobs:
           echo "Configuring Git settings..."
           git config --global http.postBuffer 1048576000
           echo "Git settings configured successfully."
-        working-directory: $HOME/ABS
+        working-directory: runner/ABS
 
   set_git_username:
     runs-on: ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
           echo "Setting Git username..."
           git config --global user.name 'github-actions'
           echo "Git username set successfully."
-        working-directory: $HOME/ABS
+        working-directory: runner/ABS
 
   set_git_email:
     runs-on: ubuntu-latest
@@ -57,7 +57,7 @@ jobs:
           echo "Setting Git email..."
           git config --global user.email 'github-actions@github.com'
           echo "Git email set successfully."
-        working-directory: $HOME/ABS
+        working-directory: runner/ABS
 
   install_repo_tool:
     runs-on: ubuntu-latest
@@ -96,7 +96,7 @@ jobs:
           echo "Starting build script..."
           bash build.sh -v
           echo "Build script executed successfully."
-        working-directory: $HOME/ABS
+        working-directory: runner/ABS
 
   navigate_to_chromite_bin:
     runs-on: ubuntu-latest
@@ -105,7 +105,7 @@ jobs:
       - name: Navigate to the Chromite binary directory to prepare for building
         run: |
           echo "Navigating to the Chromite binary directory..."
-        working-directory: $HOME/ABS/ChromiumOS/chromite/bin
+        working-directory: runner/ABS/ChromiumOS/chromite/bin
 
   build_packages:
     runs-on: ubuntu-latest
@@ -164,7 +164,7 @@ jobs:
       - name: Clean the repository cache to free up space
         run: |
           echo "Cleaning repository cache..."
-          rm -rf $HOME/.repo/
+          rm -rf runner/.repo/
           echo "Repository cache cleaned successfully."
 
   verify_repo_cache:
