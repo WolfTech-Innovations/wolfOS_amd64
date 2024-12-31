@@ -1,8 +1,0 @@
-{
-  "build_target": {
-    "name": "%(build_target)s"
-  },
-  "chroot": {
-    "path": "%(chroot)s"
-  }
-}

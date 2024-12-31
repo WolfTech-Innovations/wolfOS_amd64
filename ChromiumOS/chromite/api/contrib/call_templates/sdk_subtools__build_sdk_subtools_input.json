@@ -1,8 +1,0 @@
-{
-  "chroot": {
-    "path": "/usr/local/google/home/tapted/chromiumos/out/build/amd64-subtools-host"
-  },
-  "result_path": {
-    "transfer": 2
-  }
-}
