@@ -8,7 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -27,12 +26,12 @@ jobs:
         sudo chmod -R 777 ./*
         sudo apt-get update
         sudo apt-get install -y curl
-        sudo mkdir -p ./scripts
-        curl https://storage.googleapis.com/git-repo-downloads/repo > ./scripts/repo
-        chmod a+x ./scripts/repo
+        sudo mkdir -p ../../../scripts
+        curl https://storage.googleapis.com/git-repo-downloads/repo > ../../.../../../scripts/repo
+        chmod a+x ../../.../../../scripts/repo
 
     - name: Intialize Repo
-      run: ./scripts/repo init -u https://chromium.googlesource.com/chromiumos/manifest -b stable && ./scripts/repo sync
+      run: ../../../scripts/repo init -u https://chromium.googlesource.com/chromiumos/manifest -b stable && ../../../scripts/repo sync
   
     - name: Run build script
       run: sudo bash build.sh
