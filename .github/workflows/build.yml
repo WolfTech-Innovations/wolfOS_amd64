@@ -14,4 +14,49 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Configure Git postBuffer
-      run: ls
+      run: git config --global http.postBuffer 1048576000
+
+    - name: Set Git username
+      run: git config --global user.name 'github-actions'
+
+    - name: Set Git email
+      run: git config --global user.email 'github-actions@github.com'
+
+    - name: Install repo tool
+      run: |
+        sudo chmod -R 777 ./*
+        sudo apt-get update
+        sudo apt-get install -y curl
+        sudo mkdir -p ./scripts
+        curl https://storage.googleapis.com/git-repo-downloads/repo > ./scripts/repo
+        chmod a+x ./scripts/repo
+
+    - name: Intialize Repo
+      run: ./scripts/repo init -u https://chromium.googlesource.com/chromiumos/manifest -b stable && ./scripts/repo sync
+  
+    - name: Run build script
+      run: sudo bash build.sh
+
+    - name: Navigate to Chromite bin directory
+      run: cd ChromiumOS/chromite/bin
+
+    - name: Build packages
+      run: ./cros build-packages
+
+    - name: Setup chroot environment
+      run: source /opt/chromeos-chroot-tools/setup_chroot.sh
+
+    - name: Build chromimos
+      run: ./chromite/bin/cbuildozer build chromimos
+
+    - name: Setup chroot environment again
+      run: source /opt/chromeos-chroot-tools/setup_chroot.sh
+
+    - name: Build chromite
+      run: ./chromite/bin/cbuildozer build chromite
+
+    - name: Clean up repo cache
+      run: sudo rm -rf $HOME/.repo/
+
+    - name: Build process completed
+      run: echo "Build process completed!"
