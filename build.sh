@@ -14,6 +14,12 @@ VERSION="1.0"          # Define your custom version
 BRANDING_DIR="branding"  # Directory containing branding assets
 THEME_DIR="theme"        # Directory containing color theming assets
 
+mkdir -p ~/bin
+curl -o ~/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
+chmod +x ~/bin/repo
+export PATH=~/bin:$PATH
+source ~/.bashrc
+
 # Functions
 function sync_sources() {
     echo "Syncing sources..."
