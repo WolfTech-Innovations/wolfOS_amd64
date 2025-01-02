@@ -17,14 +17,10 @@ THEME_DIR="theme"        # Directory containing color theming assets
 # Functions
 function sync_sources() {
     echo "Syncing sources..."
-    if [ ! -d ChromiumOS ]; then
-        echo "Cloning ChromiumOS sources..."
-        git clone https://chromium.googlesource.com/chromiumos/manifest.git ChromiumOS
-    fi
-    cd ChromiumOS || exit
-    repo init -u https://chromium.googlesource.com/chromiumos/manifest.git
+    cd chromiumos
+    repo init --depth=1 -u https://chromium.googlesource.com/chromiumos/manifest.git
     repo sync --jobs=4
-    cd "${BUILD_ROOT}" || exit
+    cd "${BUILD_ROOT}"
 }
 
 function apply_branding() {
