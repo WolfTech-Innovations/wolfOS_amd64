@@ -14,6 +14,62 @@ VERSION="1.0"          # Define your custom version
 BRANDING_DIR="branding"  # Directory containing branding assets
 THEME_DIR="theme"        # Directory containing color theming assets
 
+sudo apt install cpulimit cgroup-tools util-linux -y
+
+# Variables
+CPU_QUOTA="50%"   # CPU limit as percentage
+MEMORY_LIMIT="2G" # Memory limit for all processes
+CGROUP_NAME="global_limit"
+
+# Function to check if a command is installed
+function check_command() {
+    if ! command -v "$1" &>/dev/null; then
+        echo "Error: $1 is not installed. Please install it and try again."
+        exit 1
+    fi
+}
+
+# Ensure required commands are available
+check_command cgcreate
+check_command cpulimit
+check_command systemctl
+check_command ionice
+
+# Create a global cgroup for CPU and memory limits
+echo "Creating global cgroup for CPU and memory limits..."
+sudo cgcreate -g cpu,memory:/$CGROUP_NAME
+
+# Set CPU limit
+echo "Applying CPU limit of $CPU_QUOTA to all processes..."
+echo "50000" | sudo tee /sys/fs/cgroup/cpu/$CGROUP_NAME/cpu.cfs_quota_us
+echo "100000" | sudo tee /sys/fs/cgroup/cpu/$CGROUP_NAME/cpu.cfs_period_us
+
+# Set memory limit
+echo "Applying memory limit of $MEMORY_LIMIT to all processes..."
+echo "$MEMORY_LIMIT" | sudo tee /sys/fs/cgroup/memory/$CGROUP_NAME/memory.limit_in_bytes
+
+# Apply disk I/O throttling for all processes
+echo "Throttling disk I/O for all processes..."
+for pid in $(ps -e -o pid=); do
+    sudo ionice -c2 -n7 -p "$pid" 2>/dev/null
+done
+
+# Attach all existing processes to the cgroup
+echo "Attaching all existing processes to the global cgroup..."
+for pid in $(ps -e -o pid=); do
+    sudo cgclassify -g cpu,memory:/$CGROUP_NAME "$pid" 2>/dev/null
+done
+
+# Ensure new processes are added to the global cgroup automatically
+echo "Configuring cgroup rules for new processes..."
+echo "* cpu,memory:/$CGROUP_NAME" | sudo tee -a /etc/cgrules.conf
+
+# Restart cgred service to apply rules
+echo "Restarting cgred service to apply cgroup rules..."
+sudo systemctl restart cgred
+
+echo "Global resource limits applied successfully!"
+
 mkdir -p ~/bin
 curl -o ~/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
 chmod +x ~/bin/repo
