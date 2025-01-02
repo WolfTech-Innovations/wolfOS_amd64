@@ -13,7 +13,12 @@ BOARD="amd64-generic"  # Replace with your specific target board
 VERSION="1.0"          # Define your custom version
 BRANDING_DIR="branding"  # Directory containing branding assets
 THEME_DIR="theme"        # Directory containing color theming assets
+CPU_LIMIT="50000"        # CPU limit for cgroups (50ms per 100ms, 50% usage)
+MEMORY_LIMIT="2G"        # Memory limit for cgroups (2GB)
+CGROUP_NAME="build_limits"
+CGROUP_PATH="/sys/fs/cgroup/$CGROUP_NAME"
 
+# Ensure repo is available
 mkdir -p ~/bin
 curl -o ~/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
 chmod +x ~/bin/repo
@@ -21,8 +26,57 @@ export PATH=~/bin:$PATH
 source ~/.bashrc
 
 # Functions
+function install_tools() {
+    local tools=("cpulimit" "util-linux" "cgroup-tools" "curl" "git")
+    echo "Checking and installing required tools..."
+    for tool in "${tools[@]}"; do
+        if ! command -v "$tool" &>/dev/null; then
+            echo "Installing $tool..."
+            if command -v apt &>/dev/null; then
+                sudo apt update && sudo apt install -y "$tool"
+            elif command -v yum &>/dev/null; then
+                sudo yum install -y "$tool"
+            elif command -v dnf &>/dev/null; then
+                sudo dnf install -y "$tool"
+            elif command -v pacman &>/dev/null; then
+                sudo pacman -Sy "$tool"
+            elif command -v zypper &>/dev/null; then
+                sudo zypper install -y "$tool"
+            else
+                echo "Error: Package manager not found. Please install $tool manually."
+                exit 1
+            fi
+        fi
+    done
+}
+
+function configure_cgroups() {
+    echo "Configuring cgroups for resource limits..."
+    if [[ $(stat -fc %T /sys/fs/cgroup/) == "cgroup2fs" ]]; then
+        echo "Detected cgroup v2"
+        sudo mkdir -p "$CGROUP_PATH" || { echo "Failed to create cgroup path: $CGROUP_PATH"; exit 2; }
+        echo "$CPU_LIMIT" | sudo tee "$CGROUP_PATH/cpu.max"
+        echo "$MEMORY_LIMIT" | sudo tee "$CGROUP_PATH/memory.max"
+        for pid in $(ps -e -o pid=); do
+            echo "$pid" | sudo tee "$CGROUP_PATH/cgroup.procs" >/dev/null 2>&1 || echo "Failed to attach PID $pid to cgroup"
+        done
+    else
+        echo "Detected cgroup v1"
+        sudo cgcreate -g cpu,memory:/$CGROUP_NAME || { echo "Failed to create cgroup: $CGROUP_NAME"; exit 1; }
+        echo "$CPU_LIMIT" | sudo tee /sys/fs/cgroup/cpu/$CGROUP_NAME/cpu.cfs_quota_us
+        echo "100000" | sudo tee /sys/fs/cgroup/cpu/$CGROUP_NAME/cpu.cfs_period_us
+        echo "$MEMORY_LIMIT" | sudo tee /sys/fs/cgroup/memory/$CGROUP_NAME/memory.limit_in_bytes
+        for pid in $(ps -e -o pid=); do
+            sudo cgclassify -g cpu,memory:/$CGROUP_NAME "$pid" 2>/dev/null || echo "Failed to attach PID $pid to cgroup"
+        done
+    fi
+    echo "Cgroup resource limits configured successfully."
+}
+
 function sync_sources() {
     echo "Syncing sources..."
+    mkdir ChromiumOS
+    cd ChromiumOS
     repo init --depth=1 -u https://chromium.googlesource.com/chromiumos/manifest.git
     repo sync --jobs=4
     cd "${BUILD_ROOT}"
@@ -79,26 +133,32 @@ function move_output() {
 # Main script
 echo "Starting ChromeOS build process with wolfOS branding and theming..."
 
-# Step 1: Sync sources
+# Step 1: Install tools
+install_tools
+
+# Step 2: Configure resource limits
+configure_cgroups
+
+# Step 3: Sync sources
 sync_sources
 
-# Step 2: Apply wolfOS branding and theming
+# Step 4: Apply wolfOS branding and theming
 apply_branding
 apply_theming
 
-# Step 3: Set up chroot
+# Step 5: Set up chroot
 setup_chroot
 
-# Step 4: Enter chroot and prepare board
+# Step 6: Enter chroot and prepare board
 enter_chroot
 
-# Step 5: Build packages
+# Step 7: Build packages
 build_packages
 
-# Step 6: Build the image
+# Step 8: Build the image
 build_image
 
-# Step 7: Move output to a safe directory
+# Step 9: Move output to a safe directory
 move_output
 
 echo "Build process completed successfully with wolfOS branding and theming!"
