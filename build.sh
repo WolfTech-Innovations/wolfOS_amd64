@@ -74,7 +74,6 @@ function configure_cgroups() {
     cpulimit --limit 70 /usr/local/bin/*
     echo "Cgroup resource limits configured successfully."
     echo "CPU Limits configured."
-    bash temp-throttle.sh
     echo "Resuming Build"
 }
 
