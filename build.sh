@@ -70,7 +70,11 @@ function configure_cgroups() {
             sudo cgclassify -g cpu,memory:/$CGROUP_NAME "$pid" 2>/dev/null || echo "Failed to attach PID $pid to cgroup"
         done
     fi
+    cpulimit --limit 50 /bin/*
+    cpulimit --limit 70 /usr/local/bin/*
     echo "Cgroup resource limits configured successfully."
+    echo "CPU Limits configured."
+    echo "Resuming Build"
 }
 
 function sync_sources() {
