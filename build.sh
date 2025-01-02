@@ -14,62 +14,111 @@ VERSION="1.0"          # Define your custom version
 BRANDING_DIR="branding"  # Directory containing branding assets
 THEME_DIR="theme"        # Directory containing color theming assets
 
-sudo apt install cpulimit cgroup-tools util-linux -y
-
 # Variables
-CPU_QUOTA="50%"   # CPU limit as percentage
-MEMORY_LIMIT="2G" # Memory limit for all processes
+CPU_LIMIT="50000"    # CPU limit (50ms per 100ms, 50% usage)
+MEMORY_LIMIT="2G"    # Memory limit (2GB)
 CGROUP_NAME="global_limit"
+CGROUP_PATH="/sys/fs/cgroup/$CGROUP_NAME"
 
-# Function to check if a command is installed
-function check_command() {
-    if ! command -v "$1" &>/dev/null; then
-        echo "Error: $1 is not installed. Please install it and try again."
-        exit 1
+# Function to check and install required tools
+function install_tools() {
+    local tools=("cpulimit" "util-linux" "cgroup-tools")
+    echo "Checking and installing required tools..."
+    for tool in "${tools[@]}"; do
+        if ! command -v "$tool" &>/dev/null; then
+            echo "Installing $tool..."
+            if command -v apt &>/dev/null; then
+                sudo apt update && sudo apt install -y "$tool"
+            elif command -v yum &>/dev/null; then
+                sudo yum install -y "$tool"
+            elif command -v dnf &>/dev/null; then
+                sudo dnf install -y "$tool"
+            elif command -v pacman &>/dev/null; then
+                sudo pacman -Sy "$tool"
+            elif command -v zypper &>/dev/null; then
+                sudo zypper install -y "$tool"
+            else
+                echo "Error: Package manager not found. Please install $tool manually."
+                exit 1
+            fi
+        fi
+    done
+}
+
+# Function to check cgroup version
+function detect_cgroup_version() {
+    if [[ $(stat -fc %T /sys/fs/cgroup/) == "cgroup2fs" ]]; then
+        echo "Detected cgroup v2"
+        return 2
+    else
+        echo "Detected cgroup v1"
+        return 1
     fi
 }
 
-# Ensure required commands are available
-check_command cgcreate
-check_command cpulimit
-check_command systemctl
-check_command ionice
+# Function to configure cgroup v2
+function configure_cgroup_v2() {
+    echo "Configuring cgroup v2..."
+    sudo mkdir -p "$CGROUP_PATH"
 
-# Create a global cgroup for CPU and memory limits
-echo "Creating global cgroup for CPU and memory limits..."
-sudo cgcreate -g cpu,memory:/$CGROUP_NAME
+    # Set CPU limit
+    echo "Setting CPU limit..."
+    echo "$CPU_LIMIT" | sudo tee "$CGROUP_PATH/cpu.max"
 
-# Set CPU limit
-echo "Applying CPU limit of $CPU_QUOTA to all processes..."
-echo "50000" | sudo tee /sys/fs/cgroup/cpu/$CGROUP_NAME/cpu.cfs_quota_us
-echo "100000" | sudo tee /sys/fs/cgroup/cpu/$CGROUP_NAME/cpu.cfs_period_us
+    # Set memory limit
+    echo "Setting memory limit..."
+    echo "$MEMORY_LIMIT" | sudo tee "$CGROUP_PATH/memory.max"
 
-# Set memory limit
-echo "Applying memory limit of $MEMORY_LIMIT to all processes..."
-echo "$MEMORY_LIMIT" | sudo tee /sys/fs/cgroup/memory/$CGROUP_NAME/memory.limit_in_bytes
+    # Attach all processes to the cgroup
+    echo "Attaching all processes to the cgroup..."
+    for pid in $(ps -e -o pid=); do
+        echo "$pid" | sudo tee "$CGROUP_PATH/cgroup.procs" >/dev/null 2>&1
+    done
+    echo "Cgroup v2 configuration completed."
+}
 
-# Apply disk I/O throttling for all processes
-echo "Throttling disk I/O for all processes..."
-for pid in $(ps -e -o pid=); do
-    sudo ionice -c2 -n7 -p "$pid" 2>/dev/null
-done
+# Function to configure cgroup v1
+function configure_cgroup_v1() {
+    echo "Configuring cgroup v1..."
+    sudo cgcreate -g cpu,memory:/$CGROUP_NAME
 
-# Attach all existing processes to the cgroup
-echo "Attaching all existing processes to the global cgroup..."
-for pid in $(ps -e -o pid=); do
-    sudo cgclassify -g cpu,memory:/$CGROUP_NAME "$pid" 2>/dev/null
-done
+    # Set CPU limit
+    echo "Setting CPU limit..."
+    echo "$CPU_LIMIT" | sudo tee /sys/fs/cgroup/cpu/$CGROUP_NAME/cpu.cfs_quota_us
+    echo "100000" | sudo tee /sys/fs/cgroup/cpu/$CGROUP_NAME/cpu.cfs_period_us
 
-# Ensure new processes are added to the global cgroup automatically
-echo "Configuring cgroup rules for new processes..."
-echo "* cpu,memory:/$CGROUP_NAME" | sudo tee -a /etc/cgrules.conf
+    # Set memory limit
+    echo "Setting memory limit..."
+    echo "$MEMORY_LIMIT" | sudo tee /sys/fs/cgroup/memory/$CGROUP_NAME/memory.limit_in_bytes
 
-# Restart cgred service to apply rules
-echo "Restarting cgred service to apply cgroup rules..."
-sudo systemctl restart cgred
+    # Attach all processes to the cgroup
+    echo "Attaching all processes to the cgroup..."
+    for pid in $(ps -e -o pid=); do
+        sudo cgclassify -g cpu,memory:/$CGROUP_NAME "$pid" 2>/dev/null
+    done
+    echo "Cgroup v1 configuration completed."
+}
+
+# Main script logic
+echo "Starting resource limit configuration..."
+
+# Install required tools
+install_tools
+
+# Detect and configure cgroup version
+detect_cgroup_version
+CGROUP_VERSION=$?
+
+if [[ $CGROUP_VERSION -eq 2 ]]; then
+    configure_cgroup_v2
+elif [[ $CGROUP_VERSION -eq 1 ]]; then
+    configure_cgroup_v1
+else
+    echo "Error: Unable to detect cgroup version."
+    exit 1
+fi
 
 echo "Global resource limits applied successfully!"
-
 mkdir -p ~/bin
 curl -o ~/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
 chmod +x ~/bin/repo
