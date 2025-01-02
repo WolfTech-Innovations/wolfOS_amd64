@@ -81,7 +81,7 @@ function sync_sources() {
     echo "Syncing sources..."
     mkdir ChromiumOS
     cd ChromiumOS
-    repo init --depth=1 -u https://chromium.googlesource.com/chromiumos/manifest.git
+    repo init --depth=1 -u https://github.com/karfield/chromiumos-manifest.git -b stabilize-9000.84.B
     repo sync --jobs=1
     cd "${BUILD_ROOT}"
 }
