@@ -1,0 +1,50 @@
+name: Build wolfOS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Required Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git repo python3 python3-pip sudo curl build-essential
+
+      - name: Set Up Environment
+        run: |
+          echo "Setting up environment variables..."
+          echo "BUILD_ROOT=$(pwd)" >> $GITHUB_ENV
+          echo "OUTPUT_DIR=$(pwd)/build/output" >> $GITHUB_ENV
+          echo "CHROOT_DIR=$(pwd)/chroot" >> $GITHUB_ENV
+          echo "BOARD=amd64-generic" >> $GITHUB_ENV
+          echo "VERSION=1.0" >> $GITHUB_ENV
+          echo "BRANDING_DIR=branding" >> $GITHUB_ENV
+          echo "THEME_DIR=theme" >> $GITHUB_ENV
+
+      - name: Run Build Script
+        run: |
+          chmod +x build.sh
+          ./build.sh
+
+      - name: Archive Build Artifacts
+        if: success()
+        run: |
+          mkdir -p artifacts
+          cp -r build/output/* artifacts/
+        
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: chromeos-wolfos-artifacts
+          path: artifacts
