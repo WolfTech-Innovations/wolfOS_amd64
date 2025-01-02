@@ -82,7 +82,7 @@ function sync_sources() {
     mkdir ChromiumOS
     cd ChromiumOS
     repo init --depth=1 -u https://github.com/karfield/chromiumos-manifest.git -b stabilize-9000.84.B
-    repo sync --jobs=1
+    repo sync --jobs=1 -v --trace
     cd "${BUILD_ROOT}"
 }
 
