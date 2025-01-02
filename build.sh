@@ -23,7 +23,6 @@ source ~/.bashrc
 # Functions
 function sync_sources() {
     echo "Syncing sources..."
-    cd chromiumos
     repo init --depth=1 -u https://chromium.googlesource.com/chromiumos/manifest.git
     repo sync --jobs=4
     cd "${BUILD_ROOT}"
