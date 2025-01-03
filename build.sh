@@ -11,7 +11,7 @@ OUTPUT_DIR="${BUILD_ROOT}/build/output"
 CHROOT_DIR="${BUILD_ROOT}/chroot"
 BOARD="amd64-generic"  # Replace with your specific target board
 VERSION="1.0"          # Define your custom version
-BRANDING_DIR="branding"  # Directory containing branding assets
+BRANDING_DIR="./branding"  # Directory containing branding assets
 THEME_DIR="theme"        # Directory containing color theming assets
 CPU_LIMIT="50000"        # CPU limit for cgroups (50ms per 100ms, 50% usage)
 MEMORY_LIMIT="2G"        # Memory limit for cgroups (2GB)
@@ -27,7 +27,7 @@ source ~/.bashrc
 
 # Functions
 function install_tools() {
-    local tools=("cpulimit" "util-linux" "cgroup-tools" "curl" "git")
+    local tools=("cpulimit" "util-linux" "cgroup-tools" "curl" "git" "python2" "python3" "build-essential" "curl" "gcc" "g++")
     echo "Checking and installing required tools..."
     for tool in "${tools[@]}"; do
         if ! command -v "$tool" &>/dev/null; then
