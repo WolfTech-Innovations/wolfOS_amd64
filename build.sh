@@ -33,7 +33,7 @@ function install_tools() {
         if ! command -v "$tool" &>/dev/null; then
             echo "Installing $tool..."
             if command -v apt &>/dev/null; then
-                sudo apt update \
+                sudo apt update
                 sudo apt install -y "$tool"
             elif command -v yum &>/dev/null; then
                 sudo yum install -y "$tool"
