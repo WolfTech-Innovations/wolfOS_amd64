@@ -18,6 +18,17 @@ MEMORY_LIMIT="2G"        # Memory limit for cgroups (2GB)
 CGROUP_NAME="build_limits"
 CGROUP_PATH="/sys/fs/cgroup/$CGROUP_NAME"
 
+# Check if python3 is installed
+if command -v python3 &> /dev/null; then
+    # Create symbolic links for python and python2
+    sudo ln -sf $(which python3) /usr/bin/python
+    sudo ln -sf $(which python3) /usr/bin/python2
+    echo "Successfully linked python2 and python to python3."
+else
+    echo "python3 is not installed. Please install python3 first."
+fi
+
+
 # Ensure repo is available
 mkdir -p ~/bin
 curl -o ~/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
@@ -27,7 +38,7 @@ source ~/.bashrc
 
 # Functions
 function install_tools() {
-    local tools=("cpulimit" "util-linux" "cgroup-tools" "curl" "git" "python2" "python3" "build-essential" "curl" "gcc" "g++")
+    local tools=("cpulimit" "util-linux" "cgroup-tools" "curl" "git" "python3" "build-essential" "curl" "gcc" "g++")
     echo "Checking and installing required tools..."
     for tool in "${tools[@]}"; do
         if ! command -v "$tool" &>/dev/null; then
