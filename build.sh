@@ -27,7 +27,7 @@ source ~/.bashrc
 
 # Functions
 function install_tools() {
-    local tools=("cpulimit" "util-linux" "cgroup-tools" "curl" "git" "python" "python3" "build-essential" "curl" "gcc" "g++")
+    local tools=("cpulimit" "util-linux" "cgroup-tools" "curl" "git" "python2.7" "python3" "build-essential" "curl" "gcc" "g++")
     echo "Checking and installing required tools..."
     for tool in "${tools[@]}"; do
         if ! command -v "$tool" &>/dev/null; then
