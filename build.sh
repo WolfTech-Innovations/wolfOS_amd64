@@ -27,13 +27,14 @@ source ~/.bashrc
 
 # Functions
 function install_tools() {
-    local tools=("cpulimit" "util-linux" "cgroup-tools" "curl" "git" "python2.7" "python3" "build-essential" "curl" "gcc" "g++")
+    local tools=("cpulimit" "util-linux" "cgroup-tools" "curl" "git" "python2" "python3" "build-essential" "curl" "gcc" "g++")
     echo "Checking and installing required tools..."
     for tool in "${tools[@]}"; do
         if ! command -v "$tool" &>/dev/null; then
             echo "Installing $tool..."
             if command -v apt &>/dev/null; then
-                sudo apt update && sudo apt install -y "$tool"
+                sudo apt update \
+                sudo apt install -y "$tool"
             elif command -v yum &>/dev/null; then
                 sudo yum install -y "$tool"
             elif command -v dnf &>/dev/null; then
