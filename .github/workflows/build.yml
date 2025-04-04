@@ -53,13 +53,5 @@ jobs:
         run: |
           mkdir -p artifacts
           cp -r build/output/* artifacts/ || echo "No build artifacts found."
-
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: chromeos-wolfos-artifacts
-          path: artifacts
-          if-no-files-found: error
-
 # Note: Uploaded artifacts can be downloaded from the Actions tab in the GitHub repository.
 # Navigate to the workflow run and you will find the artifacts available for download.
