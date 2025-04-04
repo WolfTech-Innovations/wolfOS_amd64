@@ -37,14 +37,18 @@ jobs:
           chmod +x build.sh
           ./build.sh
 
+      - name: Debug Build Output
+        run: ls -l build/output/
+
       - name: Archive Build Artifacts
         if: success()
         run: |
           mkdir -p artifacts
-          cp -r build/output/* artifacts/
-        
+          cp -r build/output/* artifacts/ || echo "No build artifacts found."
+
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: chromeos-wolfos-artifacts
           path: artifacts
+          if-no-files-found: error
