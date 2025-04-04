@@ -16,6 +16,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache
+          key: ${{ runner.os }}-build-${{ hashFiles('**/build.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
       - name: Install Required Dependencies
         run: |
           sudo apt-get update
@@ -52,3 +60,6 @@ jobs:
           name: chromeos-wolfos-artifacts
           path: artifacts
           if-no-files-found: error
+
+# Note: Uploaded artifacts can be downloaded from the Actions tab in the GitHub repository.
+# Navigate to the workflow run and you will find the artifacts available for download.
